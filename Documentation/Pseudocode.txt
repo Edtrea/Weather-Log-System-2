@@ -1,0 +1,1093 @@
+Main
+{
+    map<int, Bst<weather>> day;
+    map<int, day*> month;
+    map<int, month*> map; //year
+
+    indexFile = "met_index.txt";
+
+    LoadMultiDataFileCSV(indexFile, map);
+
+
+    while(bool flag)
+    {
+        DisplayMenu();
+        Get user input for menu option;
+
+        if(input == "1")
+        {
+            Get user input for month and year to search;
+
+            print FindAverageWindTempMonth(map, month, year);
+        }
+        else if(input == "2")
+        {
+            Get user input for year to search;
+
+            print FindAverageWindTempMonth(map, year);
+        }
+        else if(input = "3")
+        {
+            Get user input for year to search;
+
+            print FindSumSolarRadMonth(map, year);
+        }
+        else if(input = "4")
+        {
+            Get user input for year to search
+
+            OutputFileAverageWindTempSolarMonth(map, year);
+        }
+        else if(input = "5")
+        {
+            Get user input for date to search
+            split date into day, month and year;
+
+            print FindHighestSolarTimeByDate(map, day, month, year);
+        }
+        else
+        {
+            print "Error: Unknown command. Only numbers 1-6 accepted." << endl;
+        }
+    }
+
+}
+
+class MenuHelper
+{
+    void DisplayMenu()
+    {
+        string menu;
+        menu += "1. The average wind speed and average ambient air temperature for a specified month and  year.\n";
+        menu += "2. Average wind speed and average ambient air temperature for each month of a specified year.\n";
+        menu += "3. Total solar radiation in kWh/m2 for each month of a specified year.\n";
+        menu += "4. Write average wind speed (km/h), average ambient air temperature and total solar radiation in kWh/m2 for each month of a specified year to CSV.\n";
+        menu += "5. Show the times for the highest solar radiation for a date (d/m/yyy/)\n";
+        menu += "6. Exit the program.\n";
+
+        return menu;
+    }
+
+    string FindAverageWindTempMonth(map<int,map> map, int month, int year) 
+    {
+        float averageWind = AverageWindSpeedMonth(map, month, year);
+        float averageTemp = GetAverageAirTemperatureMonth(map, month, year);
+
+        if(averageWind == -1 && averageTemp == -1)
+        {
+            print No data for the month;
+        }
+        else
+        {
+            float averageWind = ConvertWindMStoKMH(averageWind);
+
+            print result;
+        }
+    }
+
+    string FindAverageWindTempMonth(map<int,map> map, int year)
+    {
+        float averageWind, averageTemp;
+
+        for(each month)
+        {
+            averageWind = AverageWindSpeedMonth(map, month, year);
+            averageTemp = GetAverageAirTemperatureMonth(map, month, year);
+
+            if(averageWind == -1 && averageTemp == -1)
+            {
+                print no data for month;
+            }
+            else
+            {
+                averageWind = ConvertWindMStoKMH(averageWind);
+
+                print result;
+            }
+        }
+    }
+
+    string FindSumSolarRadMonth(map, year)
+    {
+        float totalRadiation;
+
+        for(each month)
+        {
+            totalRadiation = SumSolarRadiationMonth(map, month, year);
+            
+            if(totalRadiation == -1)
+            {
+                print no data for the month;
+            }
+            else
+            {
+                totalRadiation = ConvertSolarRadiationWMtoKWH(totalRadiation);
+
+                print result;
+            }
+        }
+    }
+
+    void OutputFileAverageWindTempSolarMonth(map, year)
+    {
+        const outputFile = "WindTempSolar.csv";
+
+        delete WindTempSolar.csv;
+
+        outputFile.append(year);
+
+        float averageWind, averageTemp, totalRadiation;
+
+        for(each month)
+        {
+            averageWind = AverageWindSpeedMonth(map, month, year);
+            averageTemp = GetAverageAirTemperatureMonth(map, month, year);
+            totalRadiation = SumSolarRadiationMonth(map, month, year);
+
+            if(averageWind == -1 && averageTemp == -1 && totalRadiation == -1)
+            {
+                continue;
+            }
+            else
+            {
+                averageWind = ConvertWindMStoKMH(averageWind);
+                totalRadiation = ConvertSolarRadiationWMtoKWH(totalRadiation);
+
+                outputFile.append(result);
+            }
+        }
+    }
+
+    string FindHighestSolarTimeByDate(map, day, month, year)
+    {
+        string result;
+
+        resut += "Date: " + date;
+
+        float MaxSolarRadiation = HighestSolarRadiationDay(map, day, month, year);
+
+        result += "\nHigh solar radiation for the day: " + MaxSolarRadiation + "W/m2\n\n";
+
+        result += "Time:\n";
+
+        result += TimeOfSolarRadiationDay(map, day, month, year, MaxSolarRadiation);
+        
+        return result;
+    }
+
+}
+
+class ValidationHelper
+{
+    bool IsValidDate(int day, int month, int year)
+    {
+        if(year > 9999 OR year < 1000)
+        {
+            return false;
+        }
+        if(month < 1 OR month > 12)
+        {
+            return false;
+        }
+        if(day < 1 OR day > 31)
+        {
+            return false;
+        }
+
+        if(month == 2)
+        {
+            if(CheckIsLeapYear(year))
+            {
+                return (day <=29);
+            }
+            else 
+            {
+                return (day <=28);
+            }
+        }
+
+        if(month = 4 OR 6 OR 9 OR 11)
+        {
+            return (day <= 30);
+        }
+        
+        return true;
+    }
+
+    bool IsValidDate(int month, int year)
+    {
+        if(year > 9999 || year < 1000)
+        {
+            return false;
+        }
+        if(month < 1 || month > 12)
+        {
+            return false;
+        }
+            
+        return true;
+    }
+
+    bool IsValidMonth(int month)
+    {
+        if(month < 1 || month > 12)
+        {
+            return false;
+        }
+            
+        return true;
+    }
+
+    bool CheckIsLeapYear(int year)
+    {
+        return (((year % 4 == 0) AND
+         (year % 100 != 0)) OR
+         (year % 400 == 0));
+    }
+
+    bool IsValid24HourTime(int hour, int minute)
+    {
+        return (hour >= 0 && hour <= 24) AND (minute >= 0 && minute <= 59);
+    }
+}
+
+class LogicHelper
+{
+    void LoadMultiDataFileCSV(ifstream& indexFile, map<int, map> map )
+    {
+        while(there are still line to read in indexFile)
+        {
+            datafile = line;
+            LoadDataFileCSV(dataFile, map);
+        }
+    }
+
+    bool LoadDataFileCSV(ifstream& inputfile, map<int, map>& map)
+    {
+        while(there are stil line to read in inputFile)
+        {
+            get datetime (WAST) column (0);
+            split datetime column to date and time;
+            split date to day, month and year;
+            store day, month and year in date object;
+            split time to hour and minute;
+            store hour and minute in time object;
+
+            get windspeed (S) column (10);
+            get solar radiation (SR) column (11);
+            get ambient air temperature (T) column (17);
+
+            Store date, time, windspeed, solar radiation, air temp into weather object;
+
+            InsertWeatherToMap(map, weather);
+        }
+    }
+
+    InsertWeatherToMap(map<int, map>& map, weather& weather)
+    {
+        if(weather's year exist as key in map)
+        {
+            if(weather's month exist as key in month map)
+            {
+                if(weather's day exist as key in day map)
+                {
+                    Insert weather into Bst in day map's value;
+                }
+                else
+                {
+                    Create Bst and insert weather;
+                    Insert weather's day as key and Bst into day map;
+                }
+            }
+            else
+            {
+                Create Bst and insert Weather;
+                Insert weather's day as key and Bst into day map;
+                Insert weather's month as key and day map into month map;
+            }
+        }
+        else
+        {
+            Create Bst and insert Weather;
+            Insert weather's day as key and Bst into day map;
+            Insert weather's month as key and day map into month map;
+            Insert weather's year as key and month map into map;
+        }
+    }
+
+    float AverageWindSpeedMonth(map<int, map>& map, int month, int year)
+    {
+        float totalWindSpeed = 0.0;
+        int count = 0;
+
+        if(year exist as key in map)
+        {
+            if(month exist as key in month map)
+            {
+                for each day element in day map
+                {
+                    totalWindSpeed += day map.GetSumValueFloat(GetWeatherWindSpeed);
+                    count += day map.TreeNodeCount();
+                }
+            }
+            else
+            {
+                return -1;
+            }
+        }
+        else
+        {
+            return -1;
+        }
+
+        return totalWindSpeed/count;
+    }
+
+    float AverageAirTemperatureMonth((map<int, map>& map, int month, int year)
+    {
+        float totalAirTemperature = 0.0;
+        int count = 0;
+
+        if(year exist as key in map)
+        {
+            if(month exist as key in month map)
+            {
+                for each day element in day map
+                {
+                    totalAirTemperature += day map.InOrderGetMaxFloat(GetWeatherAirTemp);
+                    count += day map.TreeNodeCount();
+                }
+            }
+            else
+            {
+                return -1;
+            }
+        }
+        else
+        {
+            return -1;
+        }
+
+        return totalAirTemperature/count;
+    }
+
+    float SumSolarRadiationMonth((map<int, map>& map, int month, int year)
+    {
+        float totalSolarRadiation = 0.0;
+        float solarRad = 0.0;
+
+        if(year exist as key in map)
+        {
+            if(month exist as key in month map)
+            {
+                for each day element in day map
+                {
+                    solarRad += day map.InOrderGetMaxFloat(GetWeatherSolarRad);
+                    if(solarRad > 100)
+                    {
+                        totalSolarRadiation += solarRad;
+                    }
+                }
+            }
+            else
+            {
+                return -1;
+            }
+        }
+        else
+        {
+            return -1;
+        }
+
+        return totalSolarRadiation/number of nodes;
+    }
+    string GetStringMonth(int month)
+    {
+        switch(month)
+        {
+            case 1:
+                return "January";
+            case 2:
+                return "February";
+            case 3:
+                return "March";
+            case 4:
+                ...
+        }
+    }
+    float ConvertWindMStoKMH(float averageWind)
+    {
+        return averageWind * 3.6;
+    }
+    float ConvertSolarRadiationWMtoKWH(float totalSolarRadiation)
+    {
+        return (totalSolarRadiation/(1/6))/1000;
+    }
+    void WriteAppendFile(string output)
+    {
+        
+        file = WriteFile("WindTempSolar.csv");
+        file << output;
+    }
+
+    float HighestSolarRadiationDay(map<int,map> map, int day, int month, int year)
+    {
+        float HighestSolarRadiation;
+
+        if(year exist as key in map)
+        {
+            if(month exist as key in month map)
+            {
+                if(day exist as key in day map)
+                {
+                    HighestSolarRadiation = day map.InOrderGetMaxFloat(GetWeatherSolarRad);
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+            else
+            {
+                return -1;
+            }
+        }
+        else
+        {
+            return -1;
+        }
+
+        return HighestSolarRadiation;
+    }
+
+    string TimeOfSolarRadiationDay(map<int,map> map, int day, int month, int year, float MaxSolarRadiation)
+    {
+        string listOfTime;
+
+        if(year exist as key in map)
+        {
+            if(month exist as key in month map)
+            {
+                if(day exist as key in day map)
+                {
+                    listOfTime = day map.GetStringByInt(GetWeatherTimeBySolarRad);
+                }
+                else
+                {
+                    return "";
+                }
+            }
+            else
+            {
+                return "";
+            }
+        }
+        else
+        {
+            return "";
+        }
+
+        return listOfTime;
+    }
+
+}
+
+BstWeatherHelper
+{
+    float GetWeatherWindSpeed(weather& weather)
+    {
+        return weather.GetWindSpeed();
+    }
+    float GetWeatherAirTemp(weather& weather)
+    {
+        return weather.GetAirTemperature();
+    }
+    float GetWeatherSolarRad(weather& weather)
+    {
+        return weather.GetSolarRad();
+    }
+    string GetWeatherTimeBySolarRad(weather& weather, float solarRad)
+    {
+        if(weather.GetSolarRad == solarRad)
+        {
+            return weather.GetTime().Display24HTime() + "\n";
+        }
+        return "";
+    }
+}
+
+class Date
+{
+    public:
+        Date(int d, int m, int y)
+        {
+            m_day = d;
+            m_month = m;
+            m_year = y;
+        }
+
+        int GetDay()
+        {
+            return m_day;
+        }
+        int GetMonth()
+        {
+            return m_month;
+        }
+        int GetYear()
+        {
+            return m_year;
+        }
+
+        void SetDay(int d)
+        {
+            m_day = d;
+        }
+        void SetMonth(int m)
+        {
+            m_month = m;
+        }
+        void SetYear(int y)
+        {
+            m_year = y;
+        }
+
+    private:
+        int m_day;
+        int m_month;
+        int m_year;
+}
+
+class Time
+{
+    public:
+        Time(int h, int m)
+        {
+            m_hour = h;
+            m_minute = m;
+        }
+
+        int GetHour()
+        {
+            return m_hour;
+        }
+        int GetMinute()
+        {
+            return m_minute;
+        }
+
+        void SetHour(int h)
+        {
+            m_hour = h;
+        }
+        void SetMinute(int m)
+        {
+            m_minute = m;
+        }
+
+        string Display24HTime() const
+        {
+            string result;
+            if(m_hour < 10)
+            {
+                result += "0" + to_string(m_hour);
+            }
+            else
+            {
+                result += to_string(m_hour);
+            }
+            result += ":";
+            if(m_minute < 10)
+            {
+                result += "0" + to_string(m_minute);
+            }
+            else
+            {
+                result += to_string(m_minute);
+            }
+
+            return result;
+        }
+
+    private:
+        int m_hour;
+        int m_minute;
+
+    non-member:
+        bool operator < (const Time& lt, const Time& rt)
+        {
+            if(lt.GetHour() != rt.GetHour())
+            {
+                return lt.GetHour() < rt.GetHour();
+            }
+            return lt.GetMinute() < rt.GetMinute();
+        }
+
+        bool operator > (const Time& lt, const Time& rt)
+        {
+            if(lt.GetHour() != rt.GetHour())
+            {
+                return lt.GetHour() > rt.GetHour();
+            }
+            return lt.GetMinute() > rt.GetMinute();
+        }
+}
+
+class Weather
+{
+    public:
+        Weather()
+        {
+            m_windSpeed = -1.0;
+            m_solarRad = -1.0;
+            m_airTemp = -1.0;
+        }
+        ~Weather(){}
+
+        GetDate()
+        {
+            return m_date;
+        }
+        GetTime()
+        {
+            return m_time;
+        }
+        GetWindSpeed()
+        {
+            return m_windSpeed;
+        }
+        GetSolarRadiation()
+        {
+            return m_solarRad;
+        }
+        GetAirTemperature()
+        {
+            return m_airTemp;
+        }
+
+        SetDate(Date& date)
+        {
+            m_date = date;
+        }
+        SetTime(Time& time)
+        {
+            m_time = time;
+        }
+        SetWindSpeed(float windSpeed)
+        {
+            m_windSpeed = windSpeed;
+        }
+        SetSolarRadiation(float solar)
+        {
+            m_solarRad = solar;
+        }
+        SetAirTemp(float temp)
+        {
+            m_airTemp = temp;
+        }
+
+    private:
+        Date m_date;
+        Time m_time;
+        float m_windSpeed;
+        float m_solarRad;
+        float m_airTemp;
+
+    non-member:
+        bool operator < (const Weather& lw, const Weather& rw)
+        {
+            return lw.GetTime() < rw.GetTime();
+        }
+
+        bool operator > (const Weather& ld, const Weather& rd)
+        {
+            return lw.GetTime() > rw.GetTime();
+        }
+}
+
+
+template <class T>
+struct Node
+{
+    T value;
+    Node<T>* leftNode = nullptr;
+    Node<T>* rightNode = nullptr;
+};
+template <class T>
+class Bst
+{
+    public:
+        Bst()
+        {
+            root = nullptr;
+        }
+        Bst(const Bst<T>& otherTree)
+        {
+            if(otherTree.root -- nullptr)
+            {
+                root = nullptr;
+            }
+            else
+            {
+                CopyTree(root, otherTree.root);
+            }
+        }
+        ~Bst()
+        {
+            Destroy(root);
+        }
+
+        void DeleteTree()
+        {
+            Destroy(root);
+        }
+
+        Bst<T>& operator = (const Bst<T>& otherTree)
+        {
+            if(this.tree != otherTree)
+            {
+                if(this.tree.root != nullptr)
+                {
+                    Destroy(root);
+                }
+                if(otherTree.root == nullptr)
+                {
+                    root = nullptr;
+                }
+                else
+                {
+                    CopyTree(root, otherTree.root);
+                }
+            }
+            return *this.tree;
+        }
+
+        bool Search(const Node<T>* root, const T& searchItem) const
+        {
+            if(root = nullptr)
+            {
+                return false;
+            }
+            else
+            {
+                if(root->value == searchItem)
+                {
+                    return true;
+                }
+                else if(root->value > searchItem)
+                {
+                    repeat Search with leftNode;
+                }
+                else if(root->value < searchItem)
+                {
+                    repeat Search with rightNode;
+                }
+            }
+        }
+        void Insert(const T& insertItem)
+        {
+            Node<T>* newNode = new Node<T>;
+            newNode->value = insertItem;
+            if(root == nullptr)
+            {
+                set root as newNode;
+            }
+            else
+            {
+                Insert(newNode, root);
+            }
+        }
+        void DeleteNode(const T& deleteItem)
+        {
+            if(root == nullptr)
+            {
+                print "error empty tree";
+            }
+            else
+            {
+
+                while(current Node != nullptr and deleteItem not found)
+                {
+                    if(current Node's value == deleteItem)
+                    {
+                        deleteItem found;
+                    }
+                    else
+                    {
+                        if(current Node's value > deleteItem)
+                        {
+                            Set current Node to current Node's leftNode;
+                        }
+                        else
+                        {
+                            Set current Node to current Node's rightNode;
+                        }
+                    }
+                }
+
+                if(current Node == nullptr)
+                {
+                    print deleteItem not found in tree;
+                }
+                else if(deleteItem found)
+                {
+                    DeleteFromTree(Found Node);
+                }
+            }
+
+        }
+        int TreeNodeCount() const
+        {
+            return NodeCount(root);
+        }
+        
+
+        void InOrderTraversal(void (*function) (T&)) const
+        {
+            InOrder(root, *function);
+        }
+        void PreOrderTraversal(void (*function) (T&)) const
+        {
+            PreOrder(root, *function);
+        }
+        void PostOrderTraversal(void (*function) (T&)) const
+        {
+            PostOrder(root, *function);
+        }
+
+        float InOrderGetMaxFloat() const
+        {
+            float highest = -1;
+            return GetMaxFloat(root, highest);
+        }
+        float InOrderGetMaxFloat(float (*function) (T&)) const
+        {
+            float highest = -1;
+            return GetMaxFloat(root, *function, highest);
+        }
+        float GetSumValueFloat()const
+        {
+            float total = 0;
+            return SumValueFloat(root, total);
+        }
+        float GetSumValueFloat(float (*function) (T&))const
+        {
+            float total = 0;
+            return SumValueFloat(root, *function, total);
+        }
+        string GetStringByInt(*function, int searchValue)
+        {
+            return StringByInt(root, *function, searchValue);
+        }
+         
+
+    private:
+        Node<T> *root;
+
+        void CopyTree(Node<T>* &copiedTreeRoot, Node<T>* otherTreeRoot)
+        {
+            if(otherTreeRoot == nullptr)
+            {
+                copiedTreeRoot = nullptr;
+            }
+            else
+            {
+                Set copiedTreeRoot's Node value to otherTreeRoot's Node value;
+                Repeat for each Node that is not null;
+            }
+        }
+
+        void Insert(Node<T>* &newNode, Node<T>* &parent)
+        {
+            if(newNode->value < parent->value)
+            {
+                if(parent->leftNode == nullptr)
+                {
+                    parent->leftNode = newNode;
+                }
+                else
+                {
+                    parent = parent->leftNode;
+                    repeat Insert function with new parent;
+                }
+            }
+            else
+            {
+                if(parent->rightNode == nullptr)
+                {
+                    parent->rightNode = newNode;
+                }
+                else
+                {
+                    parent = parent->rightNode;
+                    repeat Insert function with new parent;
+                }
+            }
+        }
+        void Destroy(Node<T>* &p)
+        {
+            if(p != nullptr)
+            {
+                repeat Destroy function for p->leftNode;
+                repeat Destroy function for p->rightNode;
+                delete p;
+                p = nullptr;
+            }
+        }
+        void DeleteFromTree(Node<T>* &p)
+        {
+            if(p == nullptr)
+            {
+                print "error node do not exist";
+            }
+            else if(p->leftNode == ptr && p->rightNode == nullptr)
+            {
+                p = nullptr;
+            }
+            else if(p->leftNode == nullptr)
+            {
+                p = p->rightNode;
+            }
+            else if(p->rightNode == nullptr)
+            {
+                p = p->leftNode;
+            }
+            else
+            {
+                current = p->leftNode;
+                trailCurrent = nullptr;
+                while(p->rightNode != nullptr)
+                {
+                    trailCurrent = current;
+                    current = current->rightNode;
+                }
+
+                p->value = current->value;
+
+                if(trailCurrent == nullptr)
+                {
+                    p->leftNode = current->leftNode;
+                }
+                else
+                {
+                    trailCurrent->rightNode = current->leftNode;
+                }
+                delete current;
+            }
+        }
+        int NodeCount(Node<T>* p) const
+        {
+            if(p == nullptr)
+            {
+                return 0;
+            }
+            return 1 + NodeCount(p->leftNode) + NodeCount(p->rightNode);
+        }
+
+        
+        void InOrder(Node<T>* p, void(*function)(T&)) const
+        {
+            if(p != nullptr)
+            {
+                InOrder(p->leftNode, *function);
+                function(p->value);
+                InOrder(p->rightNode, *function);
+            }
+        }
+        void PreOrder(Node<T>* p, void (*function) (T&)) const
+        {
+            if(p != nullptr)
+            {
+                function(p->value);
+                PreOrder(p->leftNode, *function);
+                PreOrder(p->rightNode, *function);
+            }
+        }
+        void PostOrder(Node<T>* p, void (*function) (T&)) const
+        {
+            PostOrder(p->leftNode, *function);
+            PostOrder(p->rightNode, *function);
+            function(p->value);
+        }
+
+        float GetMaxFloat(Node<T>* p, float highest) const
+        {
+            if(p != nullptr)
+            {
+                value = GetMaxFloat(p-.leftNode, highest);
+                if(value > highest)
+                {
+                    highest = value;
+                }
+                value = p->value;
+                if(value > highest)
+                {
+                    highest = value;
+                }
+                value = GetMaxFloat(p->rightNode, highest)
+                if(value > highest)
+                {
+                    highest = value;
+                }
+            }
+            return highest;
+        }
+        float GetMaxFloat(Node<T>* p, float(*function)(T&), float& highest) const
+        {
+            if(p != nullptr)
+            {
+                value = GetMaxFloat(p->leftNode, *function, highest);
+                if(value > highest)
+                {
+                    highest = value;
+                }
+                value = function(p->value);
+                if(value > highest)
+                {
+                    highest = value;
+                }
+                value = GetMaxFloat(p->rightNode, *function, highest);
+                if(value > highest)
+                {
+                    highest = value;
+                }
+            }
+            return highest;
+        }
+        float SumValueFloat(Node<T>* p, float& total) const
+        {
+            if(p != nullptr)
+            {
+                SumValueFloat(p->leftNode, total);
+                total += p->value;
+                SumValueFloat(p->rightNode, total);
+
+                return total;
+            }
+            return 0;
+        }
+        float SumValueFloat(Node<T>* p, float(*function)(T&), float& total) const
+        {
+            if(p != nullptr)
+            {
+                SumValueFloat(p->leftNode, *function, total);
+                total += function(p->value);
+                SumValueFloat(p->rightNode, *function, total);
+
+                return total;
+            }
+            return 0;
+        }
+        string StringByInt(Node<T>* p, *function, int searchValue)
+        {
+            string result;
+            if(p != nullptr)
+            {
+                result += StringByInt(p->leftNode, *function, searchValue);
+                result += function(p->value, searchValue);
+                result += StringByInt(p->rightNode, *function, searchValue);
+                return result;
+            }
+            return "";
+        }
+}

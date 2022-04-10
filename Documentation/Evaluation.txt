@@ -1,0 +1,13 @@
++ Able to read data file of user's choice by reading met_index.txt
++ Able to find and print average wind speed and average ambient air temperature of user's choice of month and year based on data file using function 1
++ Able to find and print average wind speed and average ambient air temperature of each months of user's choice of year based on data file using function 2
++ Able to find total solar radiation of each months of user's choice of year based on data file using function 3
++ Able to outfile file with data of average wind speed, average ambient air temperature and total solar radiation of each months of user's choice of year based on data file using function 4
++ Able to convert wind speed from m/s to km/h
++ Able to convert W/10min/m^2 to kWh/m^2
++ Able to validate all data file's expected input and store in memory
++ Able to validate all user input to ensure input is expected
++ Able to find the highest solar radiation value for a date of user's choice and print a list of time when the highest solar radiation value is logged
++ Uses Weather Object, BST and map to store data
+
+- There are no requirements that this program do not meet
